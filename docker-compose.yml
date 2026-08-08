@@ -1,0 +1,49 @@
+# docker-compose.yml — local Northwind OLTP source (Tasks 6-8)
+# Run:  docker compose up -d
+# Stop: docker compose down          (add -v to also wipe the data volume)
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: northwind_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpw
+      MYSQL_DATABASE: northwind
+      MYSQL_USER: northwind
+      MYSQL_PASSWORD: northwind
+    ports:
+      - "3307:3306"
+    volumes:
+      # Persists data between restarts
+      - mysql_data:/var/lib/mysql
+      # *.sql here run in alphabetical order on FIRST boot only (Task 7)
+      - ./mysql/init:/docker-entrypoint-initdb.d:ro
+    command:
+      # Lets LOAD DATA INFILE read from mounted files (Task 7)
+      - --local-infile=1
+      # Sensible defaults for a dev box
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-prootpw"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  adminer:
+    image: adminer:latest
+    container_name: northwind_adminer
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    ports:
+      - "8081:8080"      # browse at http://localhost:8081
+    environment:
+      ADMINER_DEFAULT_SERVER: mysql
+      ADMINER_DESIGN: dracula
+
+volumes:
+  mysql_data:

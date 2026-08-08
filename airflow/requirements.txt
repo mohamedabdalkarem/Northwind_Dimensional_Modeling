@@ -1,0 +1,7 @@
+# Kept separate from root requirements to avoid resolver conflicts (Task 2, 36)
+apache-airflow==3.0.*
+astronomer-cosmos~=1.14
+apache-airflow-providers-snowflake
+apache-airflow-providers-amazon
+apache-airflow-providers-mysql
+dbt-snowflake~=1.9

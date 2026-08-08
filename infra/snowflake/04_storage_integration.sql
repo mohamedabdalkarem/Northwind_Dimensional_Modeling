@@ -1,0 +1,4 @@
+-- Storage integration + external stage to S3 (Task 16)
+-- Use IAM role trust, NOT embedded keys.
+-- TODO: CREATE STORAGE INTEGRATION ...; DESC INTEGRATION ...; CREATE STAGE ...;
+-- TODO: CREATE FILE FORMAT parquet_ff TYPE = PARQUET;

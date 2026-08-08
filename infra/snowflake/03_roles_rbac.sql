@@ -1,0 +1,2 @@
+-- RBAC hierarchy: LOADER / TRANSFORMER / REPORTER (Task 15)
+-- TODO: create roles, grant db/schema privileges, create service users.

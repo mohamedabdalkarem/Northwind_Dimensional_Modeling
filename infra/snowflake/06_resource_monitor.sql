@@ -1,0 +1,2 @@
+-- Credit guardrails (Task 19)
+-- TODO: CREATE RESOURCE MONITOR with 75% notify / 100% suspend triggers.

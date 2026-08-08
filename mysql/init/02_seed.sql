@@ -1,0 +1,2 @@
+-- Northwind seed data (Task 7)
+-- TODO: paste INSERT statements, or load /datasets CSVs via LOAD DATA INFILE.

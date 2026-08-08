@@ -1,0 +1,6 @@
+-- Northwind schema DDL (Task 7)
+-- TODO: paste a MySQL-compatible Northwind schema here.
+-- Nine tables: customers, employees, orders, order_details,
+-- products, suppliers, shippers, inventory_transactions, invoices.
+-- Add a `modified_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+--   ON UPDATE CURRENT_TIMESTAMP` column to every table (Task 8).

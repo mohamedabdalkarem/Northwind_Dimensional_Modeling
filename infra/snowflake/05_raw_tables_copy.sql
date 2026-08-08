@@ -1,0 +1,3 @@
+-- Raw landing tables + COPY INTO (Task 17)
+-- TODO: one raw table per source table with _loaded_at, _source_file, _load_id.
+-- TODO: COPY INTO ... FROM @stage PATTERN='.*load_date=.*' ON_ERROR=ABORT_STATEMENT;
