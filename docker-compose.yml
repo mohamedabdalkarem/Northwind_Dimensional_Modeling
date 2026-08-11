@@ -19,6 +19,10 @@ services:
       - mysql_data:/var/lib/mysql
       # *.sql here run in alphabetical order on FIRST boot only (Task 7)
       - ./mysql/init:/docker-entrypoint-initdb.d:ro
+      # CSV source data for LOAD DATA INFILE in 02_seed.sql; must live under
+      # secure_file_priv (default /var/lib/mysql-files) for the server to read it.
+      # Not :ro - the entrypoint chowns everything under /var/lib/mysql-files on boot.
+      - ./datasets:/var/lib/mysql-files/datasets
     command:
       # Lets LOAD DATA INFILE read from mounted files (Task 7)
       - --local-infile=1
