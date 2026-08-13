@@ -1,11 +1,11 @@
 /* =============================================================
    Northwind OLTP - MySQL DDL  (MySQL 5.7+ / 8.x, InnoDB)
    ============================================================= */
-DROP DATABASE IF EXISTS northwind_db;
-CREATE DATABASE northwind_db
+DROP DATABASE IF EXISTS northwind;
+CREATE DATABASE northwind
     DEFAULT CHARACTER SET utf8mb4
     DEFAULT COLLATE utf8mb4_unicode_ci;
-USE northwind_db;
+USE northwind;
 
 SET FOREIGN_KEY_CHECKS = 0;
 

@@ -9,7 +9,7 @@
    other (see 01_schema.sql section 8), so no single load order
    satisfies every constraint.
    ============================================================= */
-USE northwind_db;
+USE northwind;
 
 SET FOREIGN_KEY_CHECKS = 0;
 

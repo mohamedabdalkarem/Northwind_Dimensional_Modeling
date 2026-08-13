@@ -2,6 +2,7 @@
 dbt-core~=1.9
 dbt-snowflake~=1.9
 dlt[filesystem,sql_database]~=1.5
+pymysql~=1.1
 boto3~=1.35
 snowflake-connector-python~=3.12
 faker~=30.0
