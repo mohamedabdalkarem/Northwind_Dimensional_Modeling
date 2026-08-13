@@ -59,4 +59,4 @@ def northwind_source(
         credentials=credentials,
         table_names=table_names or TABLE_NAMES,
         reflection_level="full_with_precision",
-    )
+    ).resources.values()

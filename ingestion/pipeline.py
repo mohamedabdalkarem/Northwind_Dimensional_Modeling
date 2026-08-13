@@ -1,18 +1,17 @@
-"""dlt extraction pipeline: MySQL -> S3 (Parquet) (Tasks 10-11).
+"""dlt extraction pipeline: MySQL -> S3 (Parquet).
 
-Lands every Northwind table as Hive-partitioned Parquet:
+Lands every Northwind table:
 
     s3://<bucket>/raw/<table>/load_date=YYYY-MM-DD/<run_id>.parquet
 
 Runnable as a CLI script (`python -m ingestion.pipeline`) AND importable
-by Airflow (`from ingestion.pipeline import run_extract`, Task 38).
+by Airflow (`from ingestion.pipeline import run_extract`).
 
 No per-table incremental cursor is wired in yet: only `inventory_transactions`
 has a `transaction_modified_date` column, every other table lacks a
 modified-at column to cursor on (see ingestion/README.md). `--full-refresh`
 replaces each table's landed files outright; the default appends a new,
-uniquely-named snapshot file per run. Incremental vs. full-refresh testing
-is Task 12.
+uniquely-named snapshot file per run.
 """
 import argparse
 import os

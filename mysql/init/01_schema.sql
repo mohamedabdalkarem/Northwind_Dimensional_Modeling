@@ -38,36 +38,42 @@ SET FOREIGN_KEY_CHECKS = 1;
 CREATE TABLE orders_status (
     id           TINYINT      NOT NULL,
     status_name  VARCHAR(50)  NOT NULL,
+    modified_at  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE orders_tax_status (
     id               TINYINT      NOT NULL,
     tax_status_name  VARCHAR(50)  NOT NULL,
+    modified_at      DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE order_details_status (
     id           INT          NOT NULL,
     status_name  VARCHAR(50)  NOT NULL,
+    modified_at  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE purchase_order_status (
-    id      INT          NOT NULL,
-    status  VARCHAR(50),
+    id           INT          NOT NULL,
+    status       VARCHAR(50),
+    modified_at  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE inventory_transaction_types (
-    id         TINYINT      NOT NULL,
-    type_name  VARCHAR(50)  NOT NULL,
+    id           TINYINT      NOT NULL,
+    type_name    VARCHAR(50)  NOT NULL,
+    modified_at  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE privileges (
     id              INT NOT NULL AUTO_INCREMENT,
     privilege_name  VARCHAR(50),
+    modified_at     DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (id)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
 
@@ -95,6 +101,7 @@ CREATE TABLE customers (
     web_page         LONGTEXT,
     notes            LONGTEXT,
     attachments      LONGBLOB,
+    modified_at      DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
     INDEX ix_customers_city            (city),
     INDEX ix_customers_company         (company),
@@ -123,6 +130,7 @@ CREATE TABLE suppliers (
     web_page         LONGTEXT,
     notes            LONGTEXT,
     attachments      LONGBLOB,
+    modified_at      DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
     INDEX ix_suppliers_city            (city),
     INDEX ix_suppliers_company         (company),
@@ -151,6 +159,7 @@ CREATE TABLE employees (
     web_page         LONGTEXT,
     notes            LONGTEXT,
     attachments      LONGBLOB,
+    modified_at      DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
     INDEX ix_employees_city            (city),
     INDEX ix_employees_company         (company),
@@ -179,6 +188,7 @@ CREATE TABLE shippers (
     web_page         LONGTEXT,
     notes            LONGTEXT,
     attachments      LONGBLOB,
+    modified_at      DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
     INDEX ix_shippers_city            (city),
     INDEX ix_shippers_company         (company),
@@ -196,6 +206,7 @@ CREATE TABLE shippers (
 CREATE TABLE employee_privileges (
     employee_id   INT NOT NULL,
     privilege_id  INT NOT NULL,
+    modified_at   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (employee_id, privilege_id),
     INDEX ix_emppriv_privilege_id (privilege_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -220,6 +231,7 @@ CREATE TABLE products (
     minimum_reorder_quantity INT,
     category                 VARCHAR(50),
     attachments              LONGBLOB,
+    modified_at              DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
     INDEX ix_products_product_code (product_code)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
@@ -250,6 +262,7 @@ CREATE TABLE orders (
     tax_rate              DOUBLE        DEFAULT 0,
     tax_status_id         TINYINT,
     status_id             TINYINT       DEFAULT 0,
+    modified_at           DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
     INDEX ix_orders_customer_id   (customer_id),
     INDEX ix_orders_employee_id   (employee_id),
@@ -267,6 +280,7 @@ CREATE TABLE invoices (
     tax           DECIMAL(19,4) DEFAULT 0.0000,
     shipping      DECIMAL(19,4) DEFAULT 0.0000,
     amount_due    DECIMAL(19,4) DEFAULT 0.0000,
+    modified_at   DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
     INDEX ix_invoices_order_id (order_id)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
@@ -282,6 +296,7 @@ CREATE TABLE order_details (
     date_allocated     DATETIME,
     purchase_order_id  INT,
     inventory_id       INT,
+    modified_at        DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
     INDEX ix_od_order_id   (order_id),
     INDEX ix_od_product_id (product_id),
@@ -311,6 +326,7 @@ CREATE TABLE purchase_orders (
     approved_by     INT,
     approved_date   DATETIME,
     submitted_by    INT,
+    modified_at     DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
     UNIQUE KEY ak_purchase_orders_id (id),
     INDEX ix_po_created_by  (created_by),
@@ -327,6 +343,7 @@ CREATE TABLE purchase_order_details (
     date_received        DATETIME,
     posted_to_inventory  TINYINT       NOT NULL DEFAULT 0,
     inventory_id         INT,
+    modified_at          DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
     INDEX ix_pod_inventory_id      (inventory_id),
     INDEX ix_pod_purchase_order_id (purchase_order_id),
@@ -348,6 +365,7 @@ CREATE TABLE inventory_transactions (
     purchase_order_id          INT,
     customer_order_id          INT,
     comments                   VARCHAR(255),
+    modified_at                DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
     INDEX ix_it_customer_order_id (customer_order_id),
     INDEX ix_it_product_id        (product_id),
