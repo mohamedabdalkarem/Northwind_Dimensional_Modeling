@@ -1,4 +1,4 @@
--- Warehouses with aggressive auto-suspend to save credits (Task 14)
+-- Warehouses with aggressive auto-suspend to save credits
 CREATE WAREHOUSE IF NOT EXISTS LOADING_WH
   WAREHOUSE_SIZE = XSMALL AUTO_SUSPEND = 60 AUTO_RESUME = TRUE INITIALLY_SUSPENDED = TRUE;
 CREATE WAREHOUSE IF NOT EXISTS TRANSFORM_WH

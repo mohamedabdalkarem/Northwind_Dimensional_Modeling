@@ -1,4 +1,4 @@
--- Databases & schemas (Task 13). Idempotent DDL.
+-- Databases & schemas. Idempotent DDL.
 CREATE DATABASE IF NOT EXISTS RAW_DB;
 CREATE SCHEMA   IF NOT EXISTS RAW_DB.NORTHWIND;
 CREATE DATABASE IF NOT EXISTS ANALYTICS_DB;
