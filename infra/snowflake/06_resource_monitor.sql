@@ -1,9 +1,6 @@
 -- Credit guardrails
 -- One resource monitor shared by both warehouses: notify at 75%, hard-suspend
 -- running/new queries at 100%. Resets automatically at the start of each month.
---
--- CREATE RESOURCE MONITOR requires ACCOUNTADMIN (same as CREATE INTEGRATION,
--- see 04_storage_integration.sql).
 USE ROLE ACCOUNTADMIN;
 
 CREATE RESOURCE MONITOR IF NOT EXISTS PIPELINE_CREDIT_MONITOR
