@@ -1,8 +1,4 @@
-with source as (
-
-    select * from {{ source('northwind', 'inventory_transactions') }}
-
-),
+with source as (select * from {{ source('northwind', 'inventory_transactions') }}),
 
 renamed as (
 
@@ -24,7 +20,7 @@ renamed as (
         nullif(trim(raw_data:comments::string), '') as comments,
         to_timestamp_ntz(raw_data:modified_at::number, 6) as modified_at,
 
-        -- pipeline metadata
+        -- metadata
         _loaded_at,
         _source_file,
         _load_id

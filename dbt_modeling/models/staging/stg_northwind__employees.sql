@@ -1,8 +1,4 @@
-with source as (
-
-    select * from {{ source('northwind', 'employees') }}
-
-),
+with source as (select * from {{ source('northwind', 'employees') }}),
 
 renamed as (
 
@@ -36,7 +32,7 @@ renamed as (
         nullif(trim(raw_data:attachments__v_text::string), '') as attachments,
         to_timestamp_ntz(raw_data:modified_at::number, 6) as modified_at,
 
-        -- pipeline metadata
+        -- metadata
         _loaded_at,
         _source_file,
         _load_id

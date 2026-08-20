@@ -1,8 +1,4 @@
-with source as (
-
-    select * from {{ source('northwind', 'products') }}
-
-),
+with source as (select * from {{ source('northwind', 'products') }}),
 
 renamed as (
 
@@ -31,7 +27,7 @@ renamed as (
 
         to_timestamp_ntz(raw_data:modified_at::number, 6) as modified_at,
 
-        -- pipeline metadata
+        -- metadata
         _loaded_at,
         _source_file,
         _load_id
