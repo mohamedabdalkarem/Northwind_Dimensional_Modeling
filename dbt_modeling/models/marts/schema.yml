@@ -1,0 +1,32 @@
+version: 2
+
+models:
+  - name: dim_date_calendar
+    description: "Date dimension, 1990-01-01 to 2030-12-31. Every date column in the warehouse joins to date_key."
+    columns:
+      - name: date_key
+      - name: date_day
+
+  - name: dim_employee
+    description: "Employee dimension, Type 1 (overwrite). One row per employee, keyed off the staging id."
+    columns:
+      - name: employee_key
+        description: "Surrogate key, dbt_utils.generate_surrogate_key(['id'])."
+      - name: employee_id
+        description: "Natural key from the source system, kept for traceability/debugging."
+
+  - name: dim_supplier
+    description: "Supplier dimension, Type 1 (overwrite). One row per supplier, keyed off the staging id."
+    columns:
+      - name: supplier_key
+        description: "Surrogate key, dbt_utils.generate_surrogate_key(['id'])."
+      - name: supplier_id
+        description: "Natural key from the source system, kept for traceability/debugging."
+
+  - name: dim_shipper
+    description: "Shipper dimension, Type 1 (overwrite). One row per shipper, keyed off the staging id."
+    columns:
+      - name: shipper_key
+        description: "Surrogate key, dbt_utils.generate_surrogate_key(['id'])."
+      - name: shipper_id
+        description: "Natural key from the source system, kept for traceability/debugging."
