@@ -27,6 +27,32 @@ with dim_employees as (
         order by _loaded_at desc
     ) = 1
 
+),
+
+unknown_member as (
+
+    select
+        '-1' as employee_key,
+        -1 as employee_id,
+        'Unknown' as first_name,
+        'Unknown' as last_name,
+        'Unknown' as full_name,
+        'Unknown' as job_title,
+        null as email_address,
+        null as business_phone,
+        null as home_phone,
+        null as mobile_phone,
+        null as fax_number,
+        null as address,
+        null as city,
+        null as state_province,
+        null as zip_postal_code,
+        null as country_region,
+        null as web_page,
+        null as notes
+
 )
 
 select * from dim_employees
+union all
+select * from unknown_member

@@ -25,6 +25,33 @@ with dim_suppliers as (
     qualify row_number() over (
         partition by id
         order by _loaded_at desc) = 1
+),
+
+unknown_member as (
+
+    select
+        '-1' as supplier_key,
+        -1 as supplier_id,
+        'Unknown' as company_name,
+        'Unknown' as contact_first_name,
+        'Unknown' as contact_last_name,
+        'Unknown' as contact_full_name,
+        'Unknown' as contact_job_title,
+        null as email_address,
+        null as business_phone,
+        null as home_phone,
+        null as mobile_phone,
+        null as fax_number,
+        null as address,
+        null as city,
+        null as state_province,
+        null as zip_postal_code,
+        null as country_region,
+        null as web_page,
+        null as notes
+
 )
 
 select * from dim_suppliers
+union all
+select * from unknown_member
