@@ -6,6 +6,8 @@ sources:
     tables:
       - name: invoices
         description: "Invoice information"
+      - name: order_details
+        description: "Order line item information"
       - name: purchase_orders
         description: "Purchase order information"
       - name: customers

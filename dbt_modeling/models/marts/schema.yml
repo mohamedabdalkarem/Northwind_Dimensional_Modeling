@@ -30,3 +30,45 @@ models:
         description: "Surrogate key, dbt_utils.generate_surrogate_key(['id'])."
       - name: shipper_id
         description: "Natural key from the source system, kept for traceability/debugging."
+
+  - name: dim_customer
+    description: "Customer dimension, Type 1 (overwrite). One row per customer, keyed off the staging id."
+    columns:
+      - name: customer_key
+        description: "Surrogate key, dbt_utils.generate_surrogate_key(['id'])."
+      - name: customer_id
+        description: "Natural key from the source system, kept for traceability/debugging."
+
+  - name: dim_product
+    description: "Product dimension, Type 1 (overwrite). One row per product, keyed off the staging id."
+    columns:
+      - name: product_key
+        description: "Surrogate key, dbt_utils.generate_surrogate_key(['id'])."
+      - name: product_id
+        description: "Natural key from the source system, kept for traceability/debugging."
+
+  - name: fct_sales_transaction
+    description: "Sales fact. Grain: one row per order line (one row per stg_northwind__order_details record)."
+    columns:
+      - name: order_number
+        description: "Degenerate dimension - the order id, kept on the fact for traceability without a separate order dimension."
+      - name: order_date_key
+        description: "FK to dim_date_calendar, resolved from orders.order_date."
+      - name: customer_key
+        description: "FK to dim_customer."
+      - name: employee_key
+        description: "FK to dim_employee."
+      - name: shipper_key
+        description: "FK to dim_shipper."
+      - name: product_key
+        description: "FK to dim_product."
+      - name: quantity
+        description: "Additive measure - units sold on this order line."
+      - name: unit_price
+        description: "Additive-safe attribute - price per unit at time of sale."
+      - name: discount
+        description: "Discount rate applied to this order line, 0-1."
+      - name: gross_amount
+        description: "Additive measure - quantity * unit_price, before discount."
+      - name: net_amount
+        description: "Additive measure - quantity * unit_price * (1 - discount)."

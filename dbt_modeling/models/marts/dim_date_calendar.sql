@@ -69,6 +69,26 @@ final as (
 
     from date_parts
 
+),
+
+unknown_member as (
+
+    select
+        -1 as date_key,
+        null as date_day,
+        null as day_of_month,
+        null as month_of_year,
+        null as quarter_of_year,
+        null as year_number,
+        'Unknown' as day_name,
+        'Unknown' as month_name,
+        null as iso_week_of_year,
+        null as fiscal_period,
+        null as is_weekend,
+        null as is_holiday
+
 )
 
 select * from final
+union all
+select * from unknown_member
