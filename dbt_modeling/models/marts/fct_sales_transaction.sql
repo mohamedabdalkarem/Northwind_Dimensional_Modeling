@@ -1,3 +1,11 @@
+{{
+    config(
+        materialized='incremental',
+        unique_key='order_line_id',
+        incremental_strategy='merge'
+    )
+}}
+
 with order_lines as (
 
     select * from {{ ref('stg_northwind__order_details') }}
@@ -13,6 +21,9 @@ orders as (
 fct_sales_transaction as (
 
     select
+        -- keys
+        order_lines.id as order_line_id,
+
         -- degenerate dimension
         orders.id as order_number,
 
@@ -28,7 +39,10 @@ fct_sales_transaction as (
         order_lines.unit_price,
         order_lines.discount,
         order_lines.quantity * order_lines.unit_price as gross_amount,
-        order_lines.quantity * order_lines.unit_price * (1 - order_lines.discount) as net_amount
+        order_lines.quantity * order_lines.unit_price * (1 - order_lines.discount) as net_amount,
+
+        -- metadata
+        greatest(order_lines._loaded_at, orders.modified_at) as _loaded_at
 
     from order_lines
     inner join orders
@@ -43,6 +57,14 @@ fct_sales_transaction as (
         on orders.shipper_id = dim_shipper.shipper_id
     left join {{ ref('dim_product') }}
         on order_lines.product_id = dim_product.product_id
+
+    {% if is_incremental() %}
+
+    where greatest(order_lines._loaded_at, orders.modified_at) >= (
+        select dateadd('day', -3, max(_loaded_at)) from {{ this }}
+    )
+
+    {% endif %}
 
 )
 

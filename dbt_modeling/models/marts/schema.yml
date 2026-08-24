@@ -48,8 +48,13 @@ models:
         description: "Natural key from the source system, kept for traceability/debugging."
 
   - name: fct_sales_transaction
-    description: "Sales fact. Grain: one row per order line (one row per stg_northwind__order_details record)."
+    description: "Sales fact. Grain: one row per order line (one row per stg_northwind__order_details record). Incremental, merged on order_line_id."
     columns:
+      - name: order_line_id
+        description: "Natural key from stg_northwind__order_details.id. One row per order line - the merge key for the incremental strategy."
+        data_tests:
+          - unique
+          - not_null
       - name: order_number
         description: "Degenerate dimension - the order id, kept on the fact for traceability without a separate order dimension."
       - name: order_date_key
@@ -72,3 +77,5 @@ models:
         description: "Additive measure - quantity * unit_price, before discount."
       - name: net_amount
         description: "Additive measure - quantity * unit_price * (1 - discount)."
+      - name: _loaded_at
+        description: "greatest(order_lines._loaded_at, orders.modified_at) - the incremental cursor. order_details has no modified_at of its own, so its staging load timestamp stands in for it."
