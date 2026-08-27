@@ -2,9 +2,12 @@
     config(
         materialized='incremental',
         unique_key='order_line_id',
-        incremental_strategy='merge'
+        incremental_strategy='merge',
+        cluster_by=['order_date_key', 'customer_key']
     )
 }}
+
+{% set lookback_days = var('fact_sales_lookback_days', 3) %}
 
 with order_lines as (
 
@@ -24,8 +27,9 @@ fct_sales_transaction as (
         -- keys
         order_lines.id as order_line_id,
 
-        -- degenerate dimension
+        -- degenerate dimensions
         orders.id as order_number,
+        cast(orders.order_date as date) as order_date,
 
         -- foreign keys
         coalesce(dim_date_calendar.date_key, -1) as order_date_key,
@@ -61,7 +65,7 @@ fct_sales_transaction as (
     {% if is_incremental() %}
 
     where greatest(order_lines._loaded_at, orders.modified_at) >= (
-        select dateadd('day', -3, max(_loaded_at)) from {{ this }}
+        select dateadd('day', -{{ lookback_days }}, max(_loaded_at)) from {{ this }}
     )
 
     {% endif %}
