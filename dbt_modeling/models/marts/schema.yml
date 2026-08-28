@@ -47,6 +47,37 @@ models:
       - name: product_id
         description: "Natural key from the source system, kept for traceability/debugging."
 
+  - name: fct_order_lifecycle
+    description: "Order lifecycle fact. Grain: one row per order, updated in place as the order progresses. Answers 'are we hitting delivery commitments?' via days_to_ship and days_late. Incremental, merged on order_id. required_date comes from invoices.due_date (Northwind orders have no native required date)."
+    columns:
+      - name: order_id
+        description: "Natural key from stg_northwind__orders.id. One row per order - the merge key for the incremental strategy."
+        data_tests:
+          - unique
+          - not_null
+      - name: order_date_key
+        description: "FK to dim_date_calendar, resolved from orders.order_date."
+      - name: required_date_key
+        description: "FK to dim_date_calendar, resolved from invoices.due_date (the delivery commitment). -1 when no due date exists."
+      - name: shipped_date_key
+        description: "FK to dim_date_calendar, resolved from orders.shipped_date. -1 while the order is unshipped."
+      - name: order_date
+        description: "Degenerate dimension - the order date as a date."
+      - name: required_date
+        description: "Degenerate dimension - the delivery commitment date (invoices.due_date)."
+      - name: shipped_date
+        description: "Degenerate dimension - the date the order shipped."
+      - name: days_to_ship
+        description: "Lag measure - days between order_date and shipped_date."
+      - name: days_late
+        description: "Lag measure - days between shipped_date and required_date. Positive = shipped past the commitment."
+      - name: is_shipped
+        description: "Lifecycle flag - true once the order has a shipped_date."
+      - name: is_late
+        description: "Lifecycle flag - true when shipped_date is later than required_date."
+      - name: _loaded_at
+        description: "greatest of orders/invoices load and modified timestamps - the incremental cursor."
+
   - name: fct_sales_transaction
     description: "Sales fact. Grain: one row per order line (one row per stg_northwind__order_details record). Incremental, merged on order_line_id."
     columns:
