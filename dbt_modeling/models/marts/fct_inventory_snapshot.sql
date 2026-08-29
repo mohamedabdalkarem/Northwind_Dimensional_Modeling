@@ -9,7 +9,7 @@
 
 {% set lookback_days = var('fact_sales_lookback_days', 3) %}
 
-with orders as(
-select * from {{ ref('stg_northwind__orders') }}
+with inventory as(
+select * from {{ ref('stg_northwind__inventory_transactions') }}
 ),
 
