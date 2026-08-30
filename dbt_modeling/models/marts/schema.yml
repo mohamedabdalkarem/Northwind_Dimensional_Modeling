@@ -78,6 +78,30 @@ models:
       - name: _loaded_at
         description: "greatest of orders/invoices load and modified timestamps - the incremental cursor."
 
+  - name: fct_inventory_snapshot
+    description: "Inventory snapshot fact. Grain: one row per product per day. Built by cross-joining dim_date_calendar with dim_product and computing running stock from inventory_transactions. Serves the Product Inventory business process. units_in_stock is SEMI-ADDITIVE — you CAN sum it across products but NOT across dates (summing across dates double-counts stock). Clustered on snapshot_date_key, product_key."
+    columns:
+      - name: snapshot_date_key
+        description: "FK to dim_date_calendar - the date of the inventory snapshot."
+      - name: product_key
+        description: "FK to dim_product."
+      - name: units_in_stock
+        description: "Semi-additive measure - running stock balance at end of snapshot_date. Additive across products, NOT across dates."
+      - name: reorder_level
+        description: "From dim_product - stock level that triggers reorder."
+      - name: target_level
+        description: "From dim_product - target stock level to replenish to."
+      - name: minimum_reorder_quantity
+        description: "From dim_product - minimum order quantity when reordering."
+      - name: discontinued
+        description: "From dim_product - whether the product is discontinued."
+      - name: is_below_reorder
+        description: "Flag - true when units_in_stock <= reorder_level."
+      - name: is_at_target
+        description: "Flag - true when units_in_stock >= target_level."
+      - name: _loaded_at
+        description: "Load timestamp."
+
   - name: fct_sales_transaction
     description: "Sales fact. Grain: one row per order line (one row per stg_northwind__order_details record). Incremental, merged on order_line_id."
     columns:
