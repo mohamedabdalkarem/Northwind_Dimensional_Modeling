@@ -1,0 +1,172 @@
+name: Daily File Push
+
+on:
+  schedule:
+    # Runs every day at 12:00 AM Egypt time
+    # 12:00 AM Cairo = 21:00 UTC (previous day)
+    - cron: "0 21 * * *"
+
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  push-one-file:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Fetch scheduled work
+        run: |
+          git fetch origin scheduled-work
+
+      - name: Push today's file
+        run: |
+          TODAY=$(date -u +%Y-%m-%d)
+
+          case "$TODAY" in
+
+            2026-09-01)
+              FILE="dbt_modeling/dbt_project.yml"
+              MESSAGE="Update dbt project configuration"
+              ;;
+
+            2026-09-02)
+              FILE="dbt_modeling/macros/set_query_tag.sql"
+              MESSAGE="Add query tag macro"
+              ;;
+
+            2026-09-03)
+              FILE="dbt_modeling/models/marts/dim_order_date.sql"
+              MESSAGE="Add order date dimension"
+              ;;
+
+            2026-09-04)
+              FILE="dbt_modeling/models/marts/dim_required_date.sql"
+              MESSAGE="Add required date dimension"
+              ;;
+
+            2026-09-05)
+              FILE="dbt_modeling/models/marts/dim_ship_date.sql"
+              MESSAGE="Add ship date dimension"
+              ;;
+
+            2026-09-06)
+              FILE="dbt_modeling/models/marts/obt_customer_reporting.sql"
+              MESSAGE="Add customer reporting OBT"
+              ;;
+
+            2026-09-07)
+              FILE="dbt_modeling/models/marts/obt_product_inventory.sql"
+              MESSAGE="Add product inventory OBT"
+              ;;
+
+            2026-09-08)
+              FILE="dbt_modeling/models/marts/obt_sales_overview.sql"
+              MESSAGE="Add sales overview OBT"
+              ;;
+
+            2026-09-09)
+              FILE="dbt_modeling/models/marts/schema.yml"
+              MESSAGE="Update dbt schema"
+              ;;
+
+            2026-09-10)
+              FILE="northwind_airflow/.astro/config.yaml"
+              MESSAGE="Add Astro configuration"
+              ;;
+
+            2026-09-11)
+              FILE="northwind_airflow/.astro/config.yaml.lock"
+              MESSAGE="Add Astro configuration lock"
+              ;;
+
+            2026-09-12)
+              FILE="northwind_airflow/.astro/dag_integrity_exceptions.txt"
+              MESSAGE="Add DAG integrity exceptions"
+              ;;
+
+            2026-09-13)
+              FILE="northwind_airflow/.astro/test_dag_integrity_default.py"
+              MESSAGE="Add DAG integrity test"
+              ;;
+
+            2026-09-14)
+              FILE="northwind_airflow/.dockerignore"
+              MESSAGE="Add Airflow Docker ignore"
+              ;;
+
+            2026-09-15)
+              FILE="northwind_airflow/.gitignore"
+              MESSAGE="Add Airflow gitignore"
+              ;;
+
+            2026-09-16)
+              FILE="northwind_airflow/Dockerfile"
+              MESSAGE="Add Airflow Dockerfile"
+              ;;
+
+            2026-09-17)
+              FILE="northwind_airflow/README.md"
+              MESSAGE="Add Airflow README"
+              ;;
+
+            2026-09-18)
+              FILE="northwind_airflow/dags/.airflowignore"
+              MESSAGE="Add Airflow ignore file"
+              ;;
+
+            2026-09-19)
+              FILE="northwind_airflow/dags/exampledag.py"
+              MESSAGE="Add example Airflow DAG"
+              ;;
+
+            2026-09-20)
+              FILE="northwind_airflow/packages.txt"
+              MESSAGE="Add Airflow packages"
+              ;;
+
+            2026-09-21)
+              FILE="northwind_airflow/requirements.txt"
+              MESSAGE="Add Airflow requirements"
+              ;;
+
+            2026-09-22)
+              FILE="northwind_airflow/tests/dags/test_dag_example.py"
+              MESSAGE="Add Airflow DAG tests"
+              ;;
+
+            2026-09-23)
+              FILE="readme images/northwind olap.png"
+              MESSAGE="Add Northwind OLAP image"
+              ;;
+
+            *)
+              echo "No file scheduled for today."
+              exit 0
+              ;;
+          esac
+
+          echo "Processing: $FILE"
+
+          git checkout origin/scheduled-work -- "$FILE"
+
+          git add "$FILE"
+
+          git diff --cached --quiet && {
+            echo "No changes to commit."
+            exit 0
+          }
+
+          git commit -m "$MESSAGE"
+          git push origin main
