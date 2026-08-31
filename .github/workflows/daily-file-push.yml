@@ -32,7 +32,7 @@ jobs:
 
       - name: Push today's file
         run: |
-          TODAY=$(date -u +%Y-%m-%d)
+          TODAY=$(TZ=Africa/Cairo date +%Y-%m-%d)
 
           case "$TODAY" in
 
