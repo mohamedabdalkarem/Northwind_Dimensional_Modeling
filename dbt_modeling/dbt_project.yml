@@ -28,6 +28,7 @@ clean-targets:         # directories to be removed by `dbt clean`
 
 models:
   dbt_modeling:
+    +pre-hook: '{{ set_query_tag() }}'
     staging:
       +materialized: view
     marts:
