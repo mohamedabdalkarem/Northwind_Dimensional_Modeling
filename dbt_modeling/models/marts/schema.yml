@@ -1,6 +1,15 @@
 version: 2
 
 models:
+  - name: dim_order_date
+    description: "Conformed view of dim_date_calendar aliased for order_date joins. Allows BI tools to join the same date dimension multiple times without column-name ambiguity (e.g., fact table has order_date_key, shipped_date_key, required_date_key)."
+
+  - name: dim_ship_date
+    description: "Conformed view of dim_date_calendar aliased for shipped_date joins. Same physical table, different logical role."
+
+  - name: dim_required_date
+    description: "Conformed view of dim_date_calendar aliased for required_date / due_date joins. Same physical table, different logical role."
+
   - name: dim_date_calendar
     description: "Date dimension, 1990-01-01 to 2030-12-31. Every date column in the warehouse joins to date_key."
     columns:
@@ -77,6 +86,90 @@ models:
         description: "Lifecycle flag - true when shipped_date is later than required_date."
       - name: _loaded_at
         description: "greatest of orders/invoices load and modified timestamps - the incremental cursor."
+
+  - name: obt_sales_overview
+    description: "One Big Table for sales reporting. Joins fct_sales_transaction to all conformed dimensions (customer, employee, shipper, product, order_date). BI-ready flat table for dashboards and ad-hoc analysis."
+    columns:
+      - name: order_line_id
+      - name: order_number
+      - name: order_date
+      - name: quantity
+      - name: unit_price
+      - name: discount
+      - name: gross_amount
+      - name: net_amount
+      - name: customer_company
+      - name: customer_contact
+      - name: customer_city
+      - name: customer_state
+      - name: customer_country
+      - name: customer_email
+      - name: employee_name
+      - name: employee_title
+      - name: shipper_company
+      - name: product_code
+      - name: product_name
+      - name: product_category
+      - name: standard_cost
+      - name: list_price
+      - name: product_discontinued
+      - name: order_year
+      - name: order_month
+      - name: order_quarter
+      - name: order_iso_week
+      - name: order_day_name
+      - name: order_is_weekend
+      - name: order_is_holiday
+
+  - name: obt_product_inventory
+    description: "One Big Table for inventory reporting. Joins fct_inventory_snapshot to dim_product and snapshot date. BI-ready flat table for inventory dashboards. units_in_stock is SEMI-ADDITIVE (additive across products, NOT across dates)."
+    columns:
+      - name: snapshot_date_key
+      - name: units_in_stock
+      - name: reorder_level
+      - name: target_level
+      - name: minimum_reorder_quantity
+      - name: discontinued
+      - name: is_below_reorder
+      - name: is_at_target
+      - name: product_id
+      - name: product_code
+      - name: product_name
+      - name: product_category
+      - name: quantity_per_unit
+      - name: standard_cost
+      - name: list_price
+      - name: snapshot_year
+      - name: snapshot_month
+      - name: snapshot_quarter
+      - name: snapshot_iso_week
+      - name: snapshot_day_name
+      - name: snapshot_is_weekend
+      - name: snapshot_is_holiday
+
+  - name: obt_customer_reporting
+    description: "One Big Table for customer 360 reporting. Aggregates fct_sales_transaction and fct_order_lifecycle to customer grain. BI-ready for customer health, CLV, and retention dashboards."
+    columns:
+      - name: customer_key
+      - name: customer_id
+      - name: company_name
+      - name: contact_full_name
+      - name: email_address
+      - name: city
+      - name: country_region
+      - name: total_gross_sales
+      - name: total_net_sales
+      - name: total_units_sold
+      - name: order_count
+      - name: first_order_date
+      - name: last_order_date
+      - name: avg_order_value
+      - name: late_order_count
+      - name: shipped_order_count
+      - name: avg_days_to_ship
+      - name: avg_days_late
+      - name: late_ship_rate
+      - name: days_since_last_order
 
   - name: fct_inventory_snapshot
     description: "Inventory snapshot fact. Grain: one row per product per day. Built by cross-joining dim_date_calendar with dim_product and computing running stock from inventory_transactions. Serves the Product Inventory business process. units_in_stock is SEMI-ADDITIVE — you CAN sum it across products but NOT across dates (summing across dates double-counts stock). Clustered on snapshot_date_key, product_key."
