@@ -1,0 +1,7 @@
+# Astro Runtime includes the following pre-installed providers packages:
+# https://www.astronomer.io/docs/astro/runtime-image-architecture#provider-packages
+
+# Additional packages for Northwind pipeline
+astronomer-cosmos~=1.14
+apache-airflow-providers-snowflake~=5.5
+apache-airflow-providers-amazon~=8.22
