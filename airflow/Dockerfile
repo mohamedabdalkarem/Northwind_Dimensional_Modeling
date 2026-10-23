@@ -1,3 +1,7 @@
-# Astro runtime (Task 36). If using Astro CLI, this is generated for you.
-FROM astrocrpublic.azurecr.io/runtime:3.0-1
-# TODO: pip install -r requirements.txt in a venv for dbt if needed
+# Airflow 2.10.5 runtime, matching the image used by airflow/docker-compose.yml.
+FROM apache/airflow:2.10.5-python3.12
+
+USER root
+COPY requirements.txt /requirements.txt
+RUN pip install --no-cache-dir -r /requirements.txt
+USER airflow
