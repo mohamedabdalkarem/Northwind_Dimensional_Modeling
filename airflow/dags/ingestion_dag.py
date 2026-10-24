@@ -1,13 +1,19 @@
 """Ingestion DAG: dlt extract (MySQL->S3) -> COPY INTO Snowflake -> reconcile.
 Emits an Asset on success so the transform DAG can react (Tasks 38, 41).
 """
+from airflow.datasets import Dataset
 from airflow.decorators import dag, task
-from airflow.sdk import Asset          # Airflow 3 asset API
 import pendulum
 
-RAW_LOADED = Asset("snowflake://RAW_DB/NORTHWIND")
+RAW_LOADED = Dataset("snowflake://RAW_DB/NORTHWIND")
 
-@dag(schedule="@daily", start_date=pendulum.datetime(2024,1,1), catchup=False)
+@dag(
+    schedule="@daily",
+    start_date=pendulum.datetime(2024, 1, 1),
+    catchup=False,
+    default_args={"retries": 2, "owner": "northwind"},
+    tags=["northwind", "ingestion"],
+)
 def northwind_ingestion():
 
     @task
