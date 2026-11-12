@@ -3,4 +3,3 @@
 apache-airflow-providers-snowflake
 apache-airflow-providers-amazon
 apache-airflow-providers-mysql
-dbt-snowflake~=1.9
