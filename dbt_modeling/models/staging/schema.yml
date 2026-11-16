@@ -1,0 +1,426 @@
+version: 2
+
+models:
+  - name: stg_northwind__customers
+    description: "Cleaned customer records from the Northwind raw feed. One row per source customer record."
+    columns:
+      - name: id
+        description: "Natural key from the source system. Raw loads are append-only, so duplicates are expected here and are deduped in the marts - hence warn, not error."
+        data_tests:
+          - unique:
+              config:
+                severity: warn
+          - not_null:
+              config:
+                severity: warn
+      - name: company
+        description: "Customer company name."
+      - name: email_address
+        description: "Primary contact email."
+      - name: modified_at
+        description: "Source modification timestamp."
+      - name: _loaded_at
+        description: "Ingestion timestamp."
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
+
+  - name: stg_northwind__employees
+    description: "Cleaned employee records from the Northwind raw feed. One row per source employee record."
+    columns:
+      - name: id
+        description: "Natural key from the source system. Raw loads are append-only, so duplicates are expected here and are deduped in the marts - hence warn, not error."
+        data_tests:
+          - unique:
+              config:
+                severity: warn
+          - not_null:
+              config:
+                severity: warn
+      - name: job_title
+        description: "Employee job title."
+      - name: modified_at
+        description: "Source modification timestamp."
+      - name: _loaded_at
+        description: "Ingestion timestamp."
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
+
+  - name: stg_northwind__shippers
+    description: "Cleaned shipper records from the Northwind raw feed. One row per source shipper record."
+    columns:
+      - name: id
+        description: "Natural key from the source system. Raw loads are append-only, so duplicates are expected here and are deduped in the marts - hence warn, not error."
+        data_tests:
+          - unique:
+              config:
+                severity: warn
+          - not_null:
+              config:
+                severity: warn
+      - name: company
+        description: "Shipper company name."
+      - name: _loaded_at
+        description: "Ingestion timestamp."
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
+
+  - name: stg_northwind__suppliers
+    description: "Cleaned supplier records from the Northwind raw feed. One row per source supplier record."
+    columns:
+      - name: id
+        description: "Natural key from the source system. Raw loads are append-only, so duplicates are expected here and are deduped in the marts - hence warn, not error."
+        data_tests:
+          - unique:
+              config:
+                severity: warn
+          - not_null:
+              config:
+                severity: warn
+      - name: company
+        description: "Supplier company name."
+      - name: _loaded_at
+        description: "Ingestion timestamp."
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
+
+  - name: stg_northwind__products
+    description: "Cleaned product records from the Northwind raw feed. One row per source product record."
+    columns:
+      - name: id
+        description: "Natural key from the source system. Raw loads are append-only, so duplicates are expected here and are deduped in the marts - hence warn, not error."
+        data_tests:
+          - unique:
+              config:
+                severity: warn
+          - not_null:
+              config:
+                severity: warn
+      - name: product_code
+        description: "Human-readable product code."
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: product_name
+        description: "Product display name."
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: category
+        description: "Product category."
+        data_tests:
+          - accepted_values:
+              arguments:
+                values:
+                  - 'Baked Goods & Mixes'
+                  - 'Beverages'
+                  - 'Candy'
+                  - 'Canned Fruit & Vegetables'
+                  - 'Canned Meat'
+                  - 'Cereal'
+                  - 'Chips, Snacks'
+                  - 'Condiments'
+                  - 'Dairy'
+                  - 'Dried Fruit & Nuts'
+                  - 'Grains'
+                  - 'Jams, Preserves'
+                  - 'Oil'
+                  - 'Pasta'
+                  - 'Sauces'
+                  - 'Soups'
+              config:
+                severity: warn
+      - name: list_price
+        description: "Product list price."
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: _loaded_at
+        description: "Ingestion timestamp."
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
+
+  - name: stg_northwind__orders
+    description: "Cleaned order headers from the Northwind raw feed. One row per source order record."
+    columns:
+      - name: id
+        description: "Natural key from the source system. Raw loads are append-only, so duplicates are expected here and are deduped in the marts - hence warn, not error."
+        data_tests:
+          - unique:
+              config:
+                severity: warn
+          - not_null:
+              config:
+                severity: warn
+      - name: customer_id
+        description: "FK to stg_northwind__customers.id."
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
+          - relationships:
+              arguments:
+                to: ref('stg_northwind__customers')
+                field: id
+              config:
+                severity: warn
+      - name: employee_id
+        description: "FK to stg_northwind__employees.id."
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('stg_northwind__employees')
+                field: id
+              config:
+                severity: warn
+      - name: shipper_id
+        description: "FK to stg_northwind__shippers.id."
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('stg_northwind__shippers')
+                field: id
+              config:
+                severity: warn
+      - name: status_id
+        description: "Order status code (0 New, 1 Invoiced, 2 Shipped, 3 Closed)."
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
+          - accepted_values:
+              arguments:
+                values: [0, 1, 2, 3]
+              config:
+                severity: warn
+      - name: tax_status_id
+        description: "Tax status code (0 Tax Exempt, 1 Taxable)."
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [0, 1]
+              config:
+                severity: warn
+      - name: order_date
+        description: "Date the order was placed."
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: _loaded_at
+        description: "Ingestion timestamp."
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
+
+  - name: stg_northwind__order_details
+    description: "Cleaned order line items from the Northwind raw feed. One row per source order detail record."
+    columns:
+      - name: id
+        description: "Natural key from the source system. Raw loads are append-only, so duplicates are expected here and are deduped in the marts - hence warn, not error."
+        data_tests:
+          - unique:
+              config:
+                severity: warn
+          - not_null:
+              config:
+                severity: warn
+      - name: order_id
+        description: "FK to stg_northwind__orders.id."
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
+          - relationships:
+              arguments:
+                to: ref('stg_northwind__orders')
+                field: id
+              config:
+                severity: warn
+      - name: product_id
+        description: "FK to stg_northwind__products.id."
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
+          - relationships:
+              arguments:
+                to: ref('stg_northwind__products')
+                field: id
+              config:
+                severity: warn
+      - name: status_id
+        description: "Line status code (0 None, 1 Allocated, 2 Invoiced, 3 Shipped, 4 On Order, 5 No Stock)."
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [0, 1, 2, 3, 4, 5]
+              config:
+                severity: warn
+      - name: quantity
+        description: "Units ordered on this line."
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: unit_price
+        description: "Price per unit on this line."
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: discount
+        description: "Discount rate applied to this line, 0-1."
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: _loaded_at
+        description: "Ingestion timestamp."
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
+
+  - name: stg_northwind__invoices
+    description: "Cleaned invoice records from the Northwind raw feed. One row per source invoice record."
+    columns:
+      - name: id
+        description: "Natural key from the source system. Raw loads are append-only, so duplicates are expected here and are deduped in the marts - hence warn, not error."
+        data_tests:
+          - unique:
+              config:
+                severity: warn
+          - not_null:
+              config:
+                severity: warn
+      - name: order_id
+        description: "FK to stg_northwind__orders.id."
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
+          - relationships:
+              arguments:
+                to: ref('stg_northwind__orders')
+                field: id
+              config:
+                severity: warn
+      - name: due_date
+        description: "Payment due date (used as the delivery commitment in fct_order_lifecycle)."
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: _loaded_at
+        description: "Ingestion timestamp."
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
+
+  - name: stg_northwind__inventory_transactions
+    description: "Cleaned inventory transactions from the Northwind raw feed. One row per source inventory transaction."
+    columns:
+      - name: id
+        description: "Natural key from the source system. Raw loads are append-only, so duplicates are expected here and are deduped in the marts - hence warn, not error."
+        data_tests:
+          - unique:
+              config:
+                severity: warn
+          - not_null:
+              config:
+                severity: warn
+      - name: product_id
+        description: "FK to stg_northwind__products.id."
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
+          - relationships:
+              arguments:
+                to: ref('stg_northwind__products')
+                field: id
+              config:
+                severity: warn
+      - name: transaction_type
+        description: "Inventory transaction type (1 Purchased, 2 Sold, 3 On Hold, 4 Waste)."
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
+          - accepted_values:
+              arguments:
+                values: [1, 2, 3, 4]
+              config:
+                severity: warn
+      - name: quantity
+        description: "Units moved in the transaction."
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: transaction_created_date
+        description: "Timestamp the transaction was created."
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: _loaded_at
+        description: "Ingestion timestamp."
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
+
+  - name: stg_northwind__purchase_orders
+    description: "Cleaned purchase orders from the Northwind raw feed. One row per source purchase order."
+    columns:
+      - name: id
+        description: "Natural key from the source system. Raw loads are append-only, so duplicates are expected here and are deduped in the marts - hence warn, not error."
+        data_tests:
+          - unique:
+              config:
+                severity: warn
+          - not_null:
+              config:
+                severity: warn
+      - name: supplier_id
+        description: "FK to stg_northwind__suppliers.id."
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
+          - relationships:
+              arguments:
+                to: ref('stg_northwind__suppliers')
+                field: id
+              config:
+                severity: warn
+      - name: status_id
+        description: "Purchase order status code (0 New, 1 Submitted, 2 Approved, 3 Closed)."
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [0, 1, 2, 3]
+              config:
+                severity: warn
+      - name: _loaded_at
+        description: "Ingestion timestamp."
+        data_tests:
+          - not_null:
+              config:
+                severity: warn

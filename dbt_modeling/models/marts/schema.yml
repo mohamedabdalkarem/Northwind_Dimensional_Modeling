@@ -3,58 +3,322 @@ version: 2
 models:
   - name: dim_order_date
     description: "Conformed view of dim_date_calendar aliased for order_date joins. Allows BI tools to join the same date dimension multiple times without column-name ambiguity (e.g., fact table has order_date_key, shipped_date_key, required_date_key)."
+    columns:
+      - name: date_key
+        description: "Surrogate key for the calendar date."
+        data_tests:
+          - unique
+          - not_null
+      - name: date_day
+        description: "Full calendar date."
+        data_tests:
+          - not_null:
+              config:
+                where: "date_key != -1"
+                severity: warn
 
   - name: dim_ship_date
     description: "Conformed view of dim_date_calendar aliased for shipped_date joins. Same physical table, different logical role."
+    columns:
+      - name: date_key
+        description: "Surrogate key for the calendar date."
+        data_tests:
+          - unique
+          - not_null
+      - name: date_day
+        description: "Full calendar date."
+        data_tests:
+          - not_null:
+              config:
+                where: "date_key != -1"
+                severity: warn
 
   - name: dim_required_date
     description: "Conformed view of dim_date_calendar aliased for required_date / due_date joins. Same physical table, different logical role."
-
-  - name: dim_date_calendar
-    description: "Date dimension, 1990-01-01 to 2030-12-31. Every date column in the warehouse joins to date_key."
     columns:
       - name: date_key
+        description: "Surrogate key for the calendar date."
+        data_tests:
+          - unique
+          - not_null
       - name: date_day
+        description: "Full calendar date."
+        data_tests:
+          - not_null:
+              config:
+                where: "date_key != -1"
+                severity: warn
+
+  - name: dim_date_calendar
+    description: "Date dimension, 1990-01-01 to 2030-12-31. Every date column in the warehouse joins to date_key. Contains a -1 unknown member for unresolvable dates."
+    columns:
+      - name: date_key
+        description: "Surrogate key, cast(yyyymmdd) as int. -1 for the unknown member."
+        data_tests:
+          - unique
+          - not_null
+      - name: date_day
+        description: "Full calendar date. Null on the unknown member."
+        data_tests:
+          - not_null:
+              config:
+                where: "date_key != -1"
+                severity: warn
+      - name: day_of_month
+        description: "Day of the month, 1-31."
+        data_tests:
+          - not_null:
+              config:
+                where: "date_key != -1"
+                severity: warn
+      - name: month_of_year
+        description: "Calendar month number, 1-12."
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+              config:
+                where: "date_key != -1"
+                severity: warn
+      - name: quarter_of_year
+        description: "Calendar quarter, 1-4."
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [1, 2, 3, 4]
+              config:
+                where: "date_key != -1"
+                severity: warn
+      - name: year_number
+        description: "Calendar year."
+        data_tests:
+          - not_null:
+              config:
+                where: "date_key != -1"
+                severity: warn
+      - name: day_name
+        description: "Day name, e.g. Monday."
+        data_tests:
+          - accepted_values:
+              arguments:
+                values:
+                  - 'Sunday'
+                  - 'Monday'
+                  - 'Tuesday'
+                  - 'Wednesday'
+                  - 'Thursday'
+                  - 'Friday'
+                  - 'Saturday'
+              config:
+                where: "date_key != -1"
+                severity: warn
+      - name: month_name
+        description: "Month name, e.g. January."
+        data_tests:
+          - accepted_values:
+              arguments:
+                values:
+                  - 'January'
+                  - 'February'
+                  - 'March'
+                  - 'April'
+                  - 'May'
+                  - 'June'
+                  - 'July'
+                  - 'August'
+                  - 'September'
+                  - 'October'
+                  - 'November'
+                  - 'December'
+              config:
+                where: "date_key != -1"
+                severity: warn
+      - name: iso_week_of_year
+        description: "ISO week number."
+        data_tests:
+          - not_null:
+              config:
+                where: "date_key != -1"
+                severity: warn
+      - name: fiscal_period
+        description: "Fiscal period; fiscal year = calendar year, so fiscal period = calendar month (1-12)."
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+              config:
+                where: "date_key != -1"
+                severity: warn
+      - name: is_weekend
+        description: "True when the date falls on a Saturday or Sunday."
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [true, false]
+                quote: false
+              config:
+                where: "date_key != -1"
+                severity: warn
+      - name: is_holiday
+        description: "True when the date is a recognized US federal holiday."
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [true, false]
+                quote: false
+              config:
+                where: "date_key != -1"
+                severity: warn
 
   - name: dim_employee
     description: "Employee dimension, Type 1 (overwrite). One row per employee, keyed off the staging id."
     columns:
       - name: employee_key
         description: "Surrogate key, dbt_utils.generate_surrogate_key(['id'])."
+        data_tests:
+          - unique
+          - not_null
       - name: employee_id
         description: "Natural key from the source system, kept for traceability/debugging."
+        data_tests:
+          - unique:
+              config:
+                severity: warn
+          - not_null:
+              config:
+                severity: warn
+      - name: full_name
+        description: "Employee full name."
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
 
   - name: dim_supplier
     description: "Supplier dimension, Type 1 (overwrite). One row per supplier, keyed off the staging id."
     columns:
       - name: supplier_key
         description: "Surrogate key, dbt_utils.generate_surrogate_key(['id'])."
+        data_tests:
+          - unique
+          - not_null
       - name: supplier_id
         description: "Natural key from the source system, kept for traceability/debugging."
+        data_tests:
+          - unique:
+              config:
+                severity: warn
+          - not_null:
+              config:
+                severity: warn
+      - name: company_name
+        description: "Supplier company name."
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
 
   - name: dim_shipper
     description: "Shipper dimension, Type 1 (overwrite). One row per shipper, keyed off the staging id."
     columns:
       - name: shipper_key
         description: "Surrogate key, dbt_utils.generate_surrogate_key(['id'])."
+        data_tests:
+          - unique
+          - not_null
       - name: shipper_id
         description: "Natural key from the source system, kept for traceability/debugging."
+        data_tests:
+          - unique:
+              config:
+                severity: warn
+          - not_null:
+              config:
+                severity: warn
+      - name: company_name
+        description: "Shipper company name."
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
 
   - name: dim_customer
     description: "Customer dimension, Type 1 (overwrite). One row per customer, keyed off the staging id."
     columns:
       - name: customer_key
         description: "Surrogate key, dbt_utils.generate_surrogate_key(['id'])."
+        data_tests:
+          - unique
+          - not_null
       - name: customer_id
         description: "Natural key from the source system, kept for traceability/debugging."
+        data_tests:
+          - unique:
+              config:
+                severity: warn
+          - not_null:
+              config:
+                severity: warn
+      - name: company_name
+        description: "Customer company name."
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
 
   - name: dim_product
     description: "Product dimension, Type 1 (overwrite). One row per product, keyed off the staging id."
     columns:
       - name: product_key
         description: "Surrogate key, dbt_utils.generate_surrogate_key(['id'])."
+        data_tests:
+          - unique
+          - not_null
       - name: product_id
         description: "Natural key from the source system, kept for traceability/debugging."
+        data_tests:
+          - unique:
+              config:
+                severity: warn
+          - not_null:
+              config:
+                severity: warn
+      - name: product_name
+        description: "Product display name."
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: category
+        description: "Product category."
+        data_tests:
+          - accepted_values:
+              arguments:
+                values:
+                  - 'Baked Goods & Mixes'
+                  - 'Beverages'
+                  - 'Candy'
+                  - 'Canned Fruit & Vegetables'
+                  - 'Canned Meat'
+                  - 'Cereal'
+                  - 'Chips, Snacks'
+                  - 'Condiments'
+                  - 'Dairy'
+                  - 'Dried Fruit & Nuts'
+                  - 'Grains'
+                  - 'Jams, Preserves'
+                  - 'Oil'
+                  - 'Pasta'
+                  - 'Sauces'
+                  - 'Soups'
+              config:
+                severity: warn
+      - name: list_price
+        description: "Product list price."
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
 
   - name: fct_order_lifecycle
     description: "Order lifecycle fact. Grain: one row per order, updated in place as the order progresses. Answers 'are we hitting delivery commitments?' via days_to_ship and days_late. Incremental, merged on order_id. required_date comes from invoices.due_date (Northwind orders have no native required date)."
@@ -66,12 +330,37 @@ models:
           - not_null
       - name: order_date_key
         description: "FK to dim_date_calendar, resolved from orders.order_date."
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('dim_date_calendar')
+                field: date_key
+              config:
+                severity: warn
       - name: required_date_key
         description: "FK to dim_date_calendar, resolved from invoices.due_date (the delivery commitment). -1 when no due date exists."
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('dim_date_calendar')
+                field: date_key
+              config:
+                severity: warn
       - name: shipped_date_key
         description: "FK to dim_date_calendar, resolved from orders.shipped_date. -1 while the order is unshipped."
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('dim_date_calendar')
+                field: date_key
+              config:
+                severity: warn
       - name: order_date
         description: "Degenerate dimension - the order date as a date."
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
       - name: required_date
         description: "Degenerate dimension - the delivery commitment date (invoices.due_date)."
       - name: shipped_date
@@ -82,104 +371,393 @@ models:
         description: "Lag measure - days between shipped_date and required_date. Positive = shipped past the commitment."
       - name: is_shipped
         description: "Lifecycle flag - true once the order has a shipped_date."
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [true, false]
+                quote: false
+              config:
+                severity: warn
       - name: is_late
         description: "Lifecycle flag - true when shipped_date is later than required_date."
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [true, false]
+                quote: false
+              config:
+                severity: warn
       - name: _loaded_at
         description: "greatest of orders/invoices load and modified timestamps - the incremental cursor."
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
 
   - name: obt_sales_overview
     description: "One Big Table for sales reporting. Joins fct_sales_transaction to all conformed dimensions (customer, employee, shipper, product, order_date). BI-ready flat table for dashboards and ad-hoc analysis."
     columns:
       - name: order_line_id
+        description: "Grain key - one row per order line, inherited from fct_sales_transaction."
+        data_tests:
+          - unique
+          - not_null
       - name: order_number
+        description: "Order id the line belongs to."
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
       - name: order_date
+        description: "Date the order was placed."
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
       - name: quantity
+        description: "Units sold on this order line."
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
       - name: unit_price
+        description: "Price per unit at time of sale."
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
       - name: discount
+        description: "Discount rate applied to this order line, 0-1."
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
       - name: gross_amount
+        description: "Additive measure - quantity * unit_price, before discount."
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
       - name: net_amount
+        description: "Additive measure - quantity * unit_price * (1 - discount)."
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
       - name: customer_company
+        description: "Customer company name."
       - name: customer_contact
+        description: "Customer contact full name."
       - name: customer_city
+        description: "Customer city."
       - name: customer_state
+        description: "Customer state / province."
       - name: customer_country
+        description: "Customer country / region."
       - name: customer_email
+        description: "Customer email address."
       - name: employee_name
+        description: "Employee full name."
       - name: employee_title
+        description: "Employee job title."
       - name: shipper_company
+        description: "Shipper company name."
       - name: product_code
+        description: "Product code."
       - name: product_name
+        description: "Product display name."
       - name: product_category
+        description: "Product category."
       - name: standard_cost
+        description: "Product standard cost."
       - name: list_price
+        description: "Product list price."
       - name: product_discontinued
+        description: "Whether the product is discontinued."
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [true, false]
+                quote: false
+              config:
+                severity: warn
       - name: order_year
+        description: "Order year."
       - name: order_month
+        description: "Order month number, 1-12."
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+              config:
+                severity: warn
       - name: order_quarter
+        description: "Order quarter, 1-4."
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [1, 2, 3, 4]
+              config:
+                severity: warn
       - name: order_iso_week
+        description: "Order ISO week number."
       - name: order_day_name
+        description: "Order day name."
+        data_tests:
+          - accepted_values:
+              arguments:
+                values:
+                  - 'Sunday'
+                  - 'Monday'
+                  - 'Tuesday'
+                  - 'Wednesday'
+                  - 'Thursday'
+                  - 'Friday'
+                  - 'Saturday'
+              config:
+                severity: warn
       - name: order_is_weekend
+        description: "Whether the order date is a weekend."
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [true, false]
+                quote: false
+              config:
+                severity: warn
       - name: order_is_holiday
+        description: "Whether the order date is a US federal holiday."
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [true, false]
+                quote: false
+              config:
+                severity: warn
 
   - name: obt_product_inventory
     description: "One Big Table for inventory reporting. Joins fct_inventory_snapshot to dim_product and snapshot date. BI-ready flat table for inventory dashboards. units_in_stock is SEMI-ADDITIVE (additive across products, NOT across dates)."
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - snapshot_date_key
+              - product_id
     columns:
       - name: snapshot_date_key
+        description: "FK to dim_date_calendar - the date of the inventory snapshot."
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('dim_date_calendar')
+                field: date_key
+              config:
+                severity: warn
       - name: units_in_stock
+        description: "Semi-additive measure - running stock balance at end of snapshot_date."
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
       - name: reorder_level
+        description: "Stock level that triggers reorder."
       - name: target_level
+        description: "Target stock level to replenish to."
       - name: minimum_reorder_quantity
+        description: "Minimum order quantity when reordering."
       - name: discontinued
+        description: "Whether the product is discontinued."
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [true, false]
+                quote: false
+              config:
+                severity: warn
       - name: is_below_reorder
+        description: "Flag - true when units_in_stock <= reorder_level."
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [true, false]
+                quote: false
+              config:
+                severity: warn
       - name: is_at_target
+        description: "Flag - true when units_in_stock >= target_level."
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [true, false]
+                quote: false
+              config:
+                severity: warn
       - name: product_id
+        description: "Natural product key."
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
       - name: product_code
+        description: "Product code."
       - name: product_name
+        description: "Product display name."
       - name: product_category
+        description: "Product category."
       - name: quantity_per_unit
+        description: "Quantity per unit description."
       - name: standard_cost
+        description: "Product standard cost."
       - name: list_price
+        description: "Product list price."
       - name: snapshot_year
+        description: "Snapshot year."
       - name: snapshot_month
+        description: "Snapshot month number, 1-12."
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+              config:
+                severity: warn
       - name: snapshot_quarter
+        description: "Snapshot quarter, 1-4."
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [1, 2, 3, 4]
+              config:
+                severity: warn
       - name: snapshot_iso_week
+        description: "Snapshot ISO week number."
       - name: snapshot_day_name
+        description: "Snapshot day name."
+        data_tests:
+          - accepted_values:
+              arguments:
+                values:
+                  - 'Sunday'
+                  - 'Monday'
+                  - 'Tuesday'
+                  - 'Wednesday'
+                  - 'Thursday'
+                  - 'Friday'
+                  - 'Saturday'
+              config:
+                severity: warn
       - name: snapshot_is_weekend
+        description: "Whether the snapshot date is a weekend."
       - name: snapshot_is_holiday
+        description: "Whether the snapshot date is a US federal holiday."
 
   - name: obt_customer_reporting
     description: "One Big Table for customer 360 reporting. Aggregates fct_sales_transaction and fct_order_lifecycle to customer grain. BI-ready for customer health, CLV, and retention dashboards."
     columns:
       - name: customer_key
+        description: "Surrogate key - one row per customer."
+        data_tests:
+          - unique
+          - not_null
       - name: customer_id
+        description: "Natural customer key."
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
       - name: company_name
+        description: "Customer company name."
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
       - name: contact_full_name
+        description: "Customer contact full name."
       - name: email_address
+        description: "Customer email address."
       - name: city
+        description: "Customer city."
       - name: country_region
+        description: "Customer country / region."
       - name: total_gross_sales
+        description: "Lifetime gross sales."
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
       - name: total_net_sales
+        description: "Lifetime net sales."
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
       - name: total_units_sold
+        description: "Lifetime units sold."
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
       - name: order_count
+        description: "Distinct orders placed."
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
       - name: first_order_date
+        description: "Date of the customer's first order."
       - name: last_order_date
+        description: "Date of the customer's most recent order."
       - name: avg_order_value
+        description: "Average net amount per order line."
       - name: late_order_count
+        description: "Number of late orders."
       - name: shipped_order_count
+        description: "Number of shipped orders."
       - name: avg_days_to_ship
+        description: "Average days from order to ship."
       - name: avg_days_late
+        description: "Average days late on shipped orders."
       - name: late_ship_rate
+        description: "Share of shipped orders that were late, 0-1."
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
       - name: days_since_last_order
+        description: "Days since the customer's most recent order."
 
   - name: fct_inventory_snapshot
-    description: "Inventory snapshot fact. Grain: one row per product per day. Built by cross-joining dim_date_calendar with dim_product and computing running stock from inventory_transactions. Serves the Product Inventory business process. units_in_stock is SEMI-ADDITIVE — you CAN sum it across products but NOT across dates (summing across dates double-counts stock). Clustered on snapshot_date_key, product_key."
+    description: "Inventory snapshot fact. Grain: one row per product per day. Built by cross-joining dim_date_calendar with dim_product and computing running stock from inventory_transactions. Serves the Product Inventory business process. units_in_stock is SEMI-ADDITIVE - you CAN sum it across products but NOT across dates (summing across dates double-counts stock). Clustered on snapshot_date_key, product_key."
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - snapshot_date_key
+              - product_key
     columns:
       - name: snapshot_date_key
         description: "FK to dim_date_calendar - the date of the inventory snapshot."
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('dim_date_calendar')
+                field: date_key
+              config:
+                severity: warn
       - name: product_key
         description: "FK to dim_product."
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('dim_product')
+                field: product_key
+              config:
+                severity: warn
       - name: units_in_stock
         description: "Semi-additive measure - running stock balance at end of snapshot_date. Additive across products, NOT across dates."
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
       - name: reorder_level
         description: "From dim_product - stock level that triggers reorder."
       - name: target_level
@@ -188,12 +766,37 @@ models:
         description: "From dim_product - minimum order quantity when reordering."
       - name: discontinued
         description: "From dim_product - whether the product is discontinued."
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [true, false]
+                quote: false
+              config:
+                severity: warn
       - name: is_below_reorder
         description: "Flag - true when units_in_stock <= reorder_level."
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [true, false]
+                quote: false
+              config:
+                severity: warn
       - name: is_at_target
         description: "Flag - true when units_in_stock >= target_level."
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [true, false]
+                quote: false
+              config:
+                severity: warn
       - name: _loaded_at
         description: "Load timestamp."
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
 
   - name: fct_sales_transaction
     description: "Sales fact. Grain: one row per order line (one row per stg_northwind__order_details record). Incremental, merged on order_line_id."
@@ -205,25 +808,88 @@ models:
           - not_null
       - name: order_number
         description: "Degenerate dimension - the order id, kept on the fact for traceability without a separate order dimension."
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
       - name: order_date_key
         description: "FK to dim_date_calendar, resolved from orders.order_date."
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('dim_date_calendar')
+                field: date_key
+              config:
+                severity: warn
       - name: customer_key
         description: "FK to dim_customer."
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('dim_customer')
+                field: customer_key
+              config:
+                severity: warn
       - name: employee_key
         description: "FK to dim_employee."
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('dim_employee')
+                field: employee_key
+              config:
+                severity: warn
       - name: shipper_key
         description: "FK to dim_shipper."
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('dim_shipper')
+                field: shipper_key
+              config:
+                severity: warn
       - name: product_key
         description: "FK to dim_product."
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('dim_product')
+                field: product_key
+              config:
+                severity: warn
       - name: quantity
         description: "Additive measure - units sold on this order line."
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
       - name: unit_price
         description: "Additive-safe attribute - price per unit at time of sale."
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
       - name: discount
         description: "Discount rate applied to this order line, 0-1."
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
       - name: gross_amount
         description: "Additive measure - quantity * unit_price, before discount."
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
       - name: net_amount
         description: "Additive measure - quantity * unit_price * (1 - discount)."
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
       - name: _loaded_at
         description: "greatest(order_lines._loaded_at, orders.modified_at) - the incremental cursor. order_details has no modified_at of its own, so its staging load timestamp stands in for it."
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
